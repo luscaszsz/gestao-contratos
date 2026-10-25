@@ -22,7 +22,7 @@ services:
   consulta-contratos:
     build:
       context: ./consulta-contratos
-      dockerfile: Dockerfile
+      dockerfile: src/main/docker/Dockerfile.jvm
     ports:
       - "8080:8080"
     environment:
@@ -39,7 +39,7 @@ services:
   valida-contrato:
     build:
       context: ./valida-contrato
-      dockerfile: Dockerfile
+      dockerfile: src/main/docker/Dockerfile.jvm
     ports:
       - "8081:8080"
 

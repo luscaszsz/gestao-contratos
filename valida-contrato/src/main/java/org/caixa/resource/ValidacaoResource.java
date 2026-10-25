@@ -1,5 +1,6 @@
 package org.caixa.resource;
 
+import io.quarkus.logging.Log;
 import org.caixa.dto.ContratoDTO;
 import org.caixa.dto.PublicacaoRequest;
 import org.caixa.dto.ValidacaoResponse;
@@ -23,6 +24,9 @@ public class ValidacaoResource {
     @POST
     @Path("/validar")
     public ValidacaoResponse validar(PublicacaoRequest contrato) {
+
+        Log.info("Chegou no resource /hello/validar");
+
         boolean valido = validacaoService.validar(contrato);
         return new ValidacaoResponse(valido);
     }

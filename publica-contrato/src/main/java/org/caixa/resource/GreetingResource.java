@@ -1,5 +1,6 @@
 package org.caixa.resource;
 
+import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -20,6 +21,7 @@ public class GreetingResource {
     @Path("/publica")
     public Response hello(PublicacaoRequest request) {
         Integer inteiro = service.publicar(request);
+        Log.info("Chegou no end /hello/publica");
         return Response.ok().entity(inteiro).build();
     }
 }
