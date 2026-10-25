@@ -1,8 +1,8 @@
 
 services:
+  # Banco da consulta de contratos
   postgres:
     image: postgres:17
-    container_name: meu-postgres
     environment:
       POSTGRES_DB: ${DB_NAME:-meu_banco}
       POSTGRES_USER: ${DB_USERNAME:-postgres}
@@ -18,11 +18,11 @@ services:
       timeout: 5s
       retries: 10
 
-  api:
+  # API de consulta
+  consulta-contratos:
     build:
-      context: .
-      dockerfile: DockerFile
-    container_name: minha-api
+      context: ./consulta-contratos
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -35,5 +35,49 @@ services:
       postgres:
         condition: service_healthy
 
+  # API de validação
+  valida-contrato:
+    build:
+      context: ./valida-contrato
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+
+  # Banco exclusivo da publicação
+  postgres-publicacao:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: publicacao_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-senha}
+    volumes:
+      - publicacao_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d publicacao_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # API de publicação
+  publica-contrato:
+    build:
+      context: ./publica-contrato
+      dockerfile: src/main/docker/Dockerfile.jvm
+    ports:
+      - "8082:8080"
+    environment:
+      VALIDACAO_URL: http://valida-contrato:8080
+      DB_HOST: postgres-publicacao
+      DB_PORT: 5432
+      DB_NAME: publicacao_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-senha}
+    depends_on:
+      valida-contrato:
+        condition: service_started
+      postgres-publicacao:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  publicacao_data:
