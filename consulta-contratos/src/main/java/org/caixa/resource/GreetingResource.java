@@ -1,6 +1,10 @@
+
 package org.caixa.resource;
 
+import io.quarkus.cache.CacheKey;
+import io.quarkus.cache.CacheResult;
 import io.quarkus.logging.Log;
+import io.smallrye.common.annotation.Blocking;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -13,12 +17,19 @@ public class GreetingResource {
     ConsultaContratoService service;
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("{id}")
-    public String hello(@PathParam("id") int id) {
+    @Produces(MediaType.APPLICATION_JSON)
+    @Blocking
+    @CacheResult(cacheName = "contrato-por-id")
+    public String hello(@PathParam("id") @CacheKey int id)
+            throws InterruptedException {
 
-        Log.info("Chegou no resource /hello/1 -- Log.info normal");
+        Log.infof("ENTROU NO RESOURCE: id=%d", id);
+
+        Thread.sleep(10_000);
+
+        Log.info("FINALIZOU A ESPERA DE 10 SEGUNDOS");
+
         return service.consultaContrato(id).toString();
     }
 }
