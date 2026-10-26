@@ -1,7 +1,5 @@
 package org.caixa.resource;
 
-import io.quarkus.cache.CacheKey;
-import io.quarkus.cache.CacheResult;
 import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.inject.Inject;

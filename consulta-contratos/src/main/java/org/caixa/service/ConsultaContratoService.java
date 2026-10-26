@@ -1,5 +1,6 @@
 package org.caixa.service;
 
+import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.RequestScoped;
 import org.caixa.model.ContratoModel;
@@ -10,7 +11,7 @@ import org.caixa.model.ContratoModel;
 public class ConsultaContratoService {
 
     @CacheResult(cacheName = "contrato-por-id")
-    public ContratoModel consultaContrato(int id) throws InterruptedException {
+    public ContratoModel consultaContrato(@CacheKey int id) throws InterruptedException {
 
         Thread.sleep(10_000);
         return ContratoModel.findById(id);
