@@ -51,4 +51,13 @@ public class PublicacaoContratoModel extends PanacheEntityBase {
     @Column(name = "ultima_atualizacao", nullable = false)
     public OffsetDateTime ultimaAtualizacao;
 
+    @Column(name = "correlation_id", nullable = false)
+    public String correlationId;
+
+    @Column(name = "idempotency_key", nullable = false)
+    public String idempotencyKey;
+
+    @Column(name = "tentativas_validacao", nullable = false)
+    public Integer tentativasValidacao;
+
 }

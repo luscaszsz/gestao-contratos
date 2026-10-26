@@ -12,7 +12,9 @@ import org.eclipse.microprofile.reactive.messaging.Outgoing;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class ValidacaoService {
@@ -22,12 +24,20 @@ public class ValidacaoService {
     @Inject
     ObjectMapper objectMapper;
 
+    private final Map<String, String> resultadosPorEventId = new ConcurrentHashMap<>();
+
     @Incoming("contrato-validacao-solicitada")
     @Outgoing("contrato-validacao-resultado")
     @Blocking
     public String validar(String payload) {
 
         ContratoParaValidacaoEvent evento = desserializar(payload);
+        if(evento != null && evento.eventId() != null){
+            String jaProcessado = resultadosPorEventId.get(evento.eventId());
+            if(jaProcessado != null){
+                return jaProcessado;
+            }
+        }
         String status = "APROVADO";
         String motivo = "Contrato validado com sucesso";
 
@@ -58,8 +68,11 @@ public class ValidacaoService {
                 )
         );
 
-        return serializar(resultado);
-
+        String serializado = serializar(resultado);
+        if(evento != null && evento.eventId() != null){
+            resultadosPorEventId.putIfAbsent(evento.eventId(), serializado);
+        }
+        return serializado;
     }
 
     private ContratoParaValidacaoEvent desserializar(String payload) {

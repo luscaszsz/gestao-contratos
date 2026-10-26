@@ -18,9 +18,11 @@ public class PublicacaoResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PublicacaoResponse solicitarPublicacao(PublicacaoRequest request) {
+    public PublicacaoResponse solicitarPublicacao(
+            @HeaderParam("Idempotency-Key") String idempotencyKey,
+            PublicacaoRequest request) {
         Log.info("Chegou no end /hello/publica");
-        return service.solicitarPublicacao(request);
+        return service.solicitarPublicacao(request, idempotencyKey);
     }
 
     @GET

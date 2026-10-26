@@ -7,9 +7,9 @@ import java.util.UUID;
 
 public record ContratoParaValidacaoEvent(
         String eventId,
-        String eventTipo,
+        String eventType,
         int eventVersion,
-        OffsetDateTime occuredAt,
+        OffsetDateTime occurredAt,
         String correlationId,
         String source,
         Payload payload
