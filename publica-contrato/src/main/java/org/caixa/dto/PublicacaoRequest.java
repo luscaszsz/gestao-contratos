@@ -5,7 +5,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record PublicacaoRequest(
-        String funcao,
+        String nomeFuncao,
+        String periodicidade,
         BigDecimal valor,
         LocalDate dataInicio,
         LocalDate dataFim

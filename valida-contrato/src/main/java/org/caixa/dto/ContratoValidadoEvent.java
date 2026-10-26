@@ -6,14 +6,14 @@ import java.util.UUID;
 public record ContratoValidadoEvent(
         String eventId,
         String eventType,
-        int eventVersiona,
-        OffsetDateTime occuredAt,
+        int eventVersion,
+        OffsetDateTime occurredAt,
         String correlationId,
         String source,
         Payload payload
 ) {
     public record Payload(
-            UUID uuid,
+            UUID id,
             String statusValidacao,
             String motivo,
             OffsetDateTime validadoEm

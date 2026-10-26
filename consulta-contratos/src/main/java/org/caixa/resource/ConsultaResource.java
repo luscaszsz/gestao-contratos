@@ -10,8 +10,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.caixa.service.ConsultaContratoService;
 
-@Path("/hello")
-public class GreetingResource {
+@Path("/v1/consulta")
+public class ConsultaResource {
 
     @Inject
     ConsultaContratoService service;

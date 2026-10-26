@@ -6,17 +6,18 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record ContratoParaValidacaoEvent(
-        String eventoId,
-        Integer eventoTipo,
-        int versao,
-        OffsetDateTime offsetDateTime,
+        String eventId,
+        String eventTipo,
+        int eventVersion,
+        OffsetDateTime occuredAt,
         String correlationId,
         String source,
         Payload payload
 ) {
     public record Payload(
             UUID id,
-            String funcao,
+            String nomeFuncao,
+            String periodicidade,
             BigDecimal valor,
             LocalDate dataInicio,
             LocalDate dataFim){
