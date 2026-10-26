@@ -1,4 +1,3 @@
-
 package org.caixa.resource;
 
 import io.quarkus.cache.CacheKey;
@@ -8,6 +7,7 @@ import io.smallrye.common.annotation.Blocking;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.caixa.service.ConsultaContratoService;
 
 @Path("/v1/consulta")
@@ -20,16 +20,12 @@ public class ConsultaResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Blocking
-    @CacheResult(cacheName = "contrato-por-id")
-    public String hello(@PathParam("id") @CacheKey int id)
-            throws InterruptedException {
+    public Response consultar(@PathParam("id") int id) throws InterruptedException {
+        Log.infof("CACHE MISS: simulando lentidão para id=%d", id);
 
-        Log.infof("ENTROU NO RESOURCE: id=%d", id);
+        var contrato = service.consultaContrato(id);
+        Log.infof("Consulta lenta concluída para id=%d", id);
 
-        Thread.sleep(10_000);
-
-        Log.info("FINALIZOU A ESPERA DE 10 SEGUNDOS");
-
-        return service.consultaContrato(id).toString();
+        return Response.ok(contrato).build();
     }
 }

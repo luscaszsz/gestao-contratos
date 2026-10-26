@@ -2,7 +2,6 @@ package org.caixa.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -96,6 +95,7 @@ public class PublicaContratoService {
     }
 
     private void enviarEventoComRetry(ContratoParaValidacaoEvent event, PublicacaoContratoModel model) {
+        // tenta por x vezes
         try{
             String json = objectMapper.writeValueAsString(event);
             for(int tentativa = 1; tentativa <= MAX_TENTATIVAS_ENVIO; tentativa++){
@@ -106,6 +106,7 @@ public class PublicaContratoService {
                 }catch (Exception ex){
                     model.tentativasValidacao = tentativa;
                     if(tentativa == MAX_TENTATIVAS_ENVIO){
+                        // quando supera os retry -- salva como erro
                         model.statusValidacao = "ERRO_PUBLICACAO";
                         model.motivo = "Falha por retry";
                         model.ultimaAtualizacao = OffsetDateTime.now();
@@ -122,7 +123,7 @@ public class PublicaContratoService {
     private void esperarBackoff(int tentativa) {
         long delayMs = BACKOFF_INICIAL_MS * (1L << (tentativa - 1));
         try {
-            TimeUnit.MICROSECONDS.sleep(delayMs);
+            TimeUnit.MILLISECONDS.sleep(delayMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
