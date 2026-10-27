@@ -2,6 +2,7 @@ package org.caixa.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -30,22 +31,27 @@ public class ValidacaoService {
     @Outgoing("contrato-validacao-resultado")
     @Blocking
     public String validar(String payload) {
-
         ContratoParaValidacaoEvent evento = desserializar(payload);
         if(evento != null && evento.eventId() != null){
             String jaProcessado = resultadosPorEventId.get(evento.eventId());
             if(jaProcessado != null){
+                Log.infof("Dentro da validação -- evento já processado");
                 return jaProcessado;
             }
         }
+
+
+        Log.infof("Dentro da validação -- evento ainda nao processado");
         String status = "APROVADO";
         String motivo = "Contrato validado com sucesso";
 
         if(evento == null || evento.payload() == null || evento.payload().valor() == null){
+            Log.infof("Dentro da validação -- evento reprovado");
             status = "REPROVADO";
             motivo = "Evento invalido para validacao";
         } else if (evento.payload().valor().compareTo(LIMITE_MAXIMO)>0)
         {
+            Log.infof("Dentro da validação -- evento reprovado");
             status = "REPROVADO";
             motivo = "Valor acima do limite de demonstracao";
         }
@@ -72,6 +78,7 @@ public class ValidacaoService {
         if(evento != null && evento.eventId() != null){
             resultadosPorEventId.putIfAbsent(evento.eventId(), serializado);
         }
+        Log.infof("finalizando -- evento aprovado");
         return serializado;
     }
 

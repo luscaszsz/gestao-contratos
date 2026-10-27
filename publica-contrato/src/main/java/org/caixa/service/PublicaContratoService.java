@@ -2,6 +2,7 @@ package org.caixa.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -31,7 +32,6 @@ public class PublicaContratoService {
     @Channel("contrato-validacao-solicitada")
     Emitter<String> solicitacaoEmitter;
 
-
     @Transactional
     public PublicacaoResponse solicitarPublicacao(PublicacaoRequest dto, String indepotencyKey) {
 
@@ -40,6 +40,7 @@ public class PublicaContratoService {
         if(indepotencyKey != null && !indepotencyKey.isBlank()){
             PublicacaoContratoModel existente = PublicacaoContratoModel.find("idempotencyKey", indepotencyKey).firstResult();
             if(existente != null){
+                Log.infof("Evento ja existe, retornando processado");
                 return new PublicacaoResponse(
                         existente.id,
                         existente.correlationId,
@@ -49,6 +50,7 @@ public class PublicaContratoService {
             }
         }
 
+        Log.infof("Evento ainda nao existe, construindo...");
         // criacao de novo evento
         UUID id = UUID.randomUUID();
         String correlationId = UUID.randomUUID().toString();
@@ -158,16 +160,17 @@ public class PublicaContratoService {
     @Transactional
     public void consumirResultadoValidacao(String payload){
         ContratoValidadoEvent evento;
-
         try{
             evento = objectMapper.readValue(payload, ContratoValidadoEvent.class);
         } catch (JsonProcessingException e) {
             // erro na leitura
+            Log.infof("Erro de deserializacao");
             return;
         }
 
         // caso de evento vazio
         if(evento.eventId() == null || evento.eventId().isBlank()){
+            Log.infof("Evento vazio retornado");
             return;
         }
 
@@ -175,18 +178,23 @@ public class PublicaContratoService {
         ProcessedEventModel eventoProcessado = ProcessedEventModel.findById(evento.eventId());
         if (eventoProcessado != null){
             //evento duplicado, ignora
+            Log.infof("Evento duplicado");
             return;
         }
         if(evento.payload() == null || evento.payload().id() == null){
             // evento de validação invalido sem id, ignora
+            Log.infof("Evento invalido");
             return;
         }
 
         PublicacaoContratoModel model = PublicacaoContratoModel.findById(evento.payload().id());
         if(model == null){
             registrarEventoProcessado(evento);
+            Log.infof("Nova model - nao atualiza");
             return;
         }
+
+        Log.infof("Evento validado por api validacao -- atualizando publicacao");
 
         model.statusPublicacao = Objects.requireNonNull(evento.payload().statusValidacao(), "PENDENTE");
         model.motivo = evento.payload().motivo();
